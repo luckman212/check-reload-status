@@ -10,8 +10,8 @@ Use ONE of the following methods to restart it:
   - Choose option #16 (Restart PHP-FPM) from the pfSense console menu
   - Reboot the firewall
   - Run the following commands:
-      pkill -9 check_reload_status
-      nice -n20 /usr/local/sbin/check_reload_status
+      /bin/pkill -9 check_reload_status
+      /usr/bin/nice -n20 /usr/local/sbin/check_reload_status
 EOM
   }
 ]

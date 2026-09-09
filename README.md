@@ -48,8 +48,8 @@ Ignore the mismatch and continue? [y/N]:
 
 That is safe to answer "y" to. After it installs, you need to either reboot or respawn `check_reload_status` with e.g.
 ```
-pkill -9 check_reload_status
-nice -n20 /usr/local/sbin/check_reload_status
+/bin/pkill -9 check_reload_status
+/usr/bin/nice -n20 /usr/local/sbin/check_reload_status
 ```
 
 ## Testing
@@ -76,9 +76,9 @@ truss -o /tmp/crs_truss_output.txt -fDp $p > /tmp/crs_truss.out
 Copy the backup you made back in place and restart the daemon:
 
 ```
-pkill -9 check_reload_status
+/bin/pkill -9 check_reload_status
 cp /usr/local/sbin/check_reload_status.orig /usr/local/sbin/check_reload_status
-nice -n20 /usr/local/sbin/check_reload_status
+/usr/bin/nice -n20 /usr/local/sbin/check_reload_status
 ```
 
 ## So what was the actual problem? What did you fix?
