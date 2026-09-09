@@ -1,0 +1,46 @@
+# Optional runtime tuning for check_reload_status.
+#
+# Copy this file to:
+#   /usr/local/etc/check_reload_status.conf
+#
+# and uncomment only settings that need to differ from the built-in defaults.
+# Restart check_reload_status after changing the configuration; settings are
+# read only at process startup.
+#
+# Blank lines and lines beginning with '#' are ignored.  Values are integer
+# seconds.  Inline comments are not supported.
+
+# FastCGI inactivity timeout while waiting for response progress.
+# Valid range: 1..300 seconds.
+# fcgi_response_timeout=10
+
+# Maximum exponential retry-backoff delay for failures that are safe to retry.
+# Valid range: 1..300 seconds.
+# fcgi_retry_max_delay=30
+
+# Retry interval while serialized transient interface work is still busy when
+# the delayed gateway-monitor reconciliation timer fires.
+# Valid range: 1..60 seconds.
+# gateway_monitor_busy_retry=2
+
+# Delay after interface recovery settles before reconciling gateway monitoring.
+# Valid range: 1..300 seconds.
+# gateway_monitor_reconcile_delay=10
+
+# Grace period after a submitted transient FastCGI request has an ambiguous
+# completion state, before one final serialized reconciliation is attempted.
+# Valid range: 1..300 seconds.
+# transient_ambiguous_grace=10
+
+# Initial delay before dispatching the first transient interface event.
+# Valid range: 0..60 seconds.
+# transient_initial_debounce=1
+
+# Maximum time a sustained transient event storm may keep rearming debounce.
+# Must be >= transient_initial_debounce and transient_settle_delay.
+# Valid range: 1..300 seconds.
+# transient_max_debounce=20
+
+# Quiet/settle delay used when coalescing additional transient interface events.
+# Valid range: 0..60 seconds.
+# transient_settle_delay=2

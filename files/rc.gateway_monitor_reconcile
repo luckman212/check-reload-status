@@ -1,0 +1,44 @@
+#!/usr/local/bin/php-cgi -f
+<?php
+/*
+ * rc.gateway_monitor_reconcile
+ *
+ * Re-run gateway monitoring setup after transient interface events have
+ * settled.  A dependent interface (a GIF tunnel, or an IPv6 address that only
+ * became usable once DAD completed) can come up after rc.newwanip already
+ * called setup_gateways_monitor(), leaving dpinger without a monitor for it
+ * and the gateway stuck in an unknown state.  Re-running only the monitoring
+ * setup converges that without replaying the whole rc.newwanip workflow.
+ *
+ * Invoked by check_reload_status once all serialized per-interface work for
+ * every interface has finished.
+ */
+
+require_once("config.inc");
+require_once("gwlb.inc");
+require_once("util.inc");
+
+/* Serialize duplicate convergence passes using pfSense's runtime temp path. */
+$tmp_path = rtrim((string)g_get('tmp_path', '/tmp'), '/');
+if ($tmp_path === '') {
+	$tmp_path = '/tmp';
+}
+$lock_path = $tmp_path . '/rc.gateway_monitor_reconcile.lock';
+$fd = fopen($lock_path, "a+");
+if ($fd === false) {
+	log_error("rc.gateway_monitor_reconcile: could not open lock file");
+	exit(1);
+}
+if (!flock($fd, LOCK_EX | LOCK_NB)) {
+	/* Another pass is already running; it will observe the same state. */
+	fclose($fd);
+	exit(0);
+}
+
+log_error("Reconciling gateway monitoring after interface recovery");
+setup_gateways_monitor();
+
+flock($fd, LOCK_UN);
+fclose($fd);
+exit(0);
+?>

@@ -1,0 +1,2 @@
+Daemon used by pfSense to process system events and invoke the
+appropriate rc scripts through PHP-FPM using FastCGI.
