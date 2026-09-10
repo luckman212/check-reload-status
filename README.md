@@ -67,7 +67,7 @@ pgrep -alf dpinger > /tmp/dpinger_status.out
 procstat -f $p > /tmp/procstat_f.out
 procstat -t $p > /tmp/procstat_t.out
 procstat -kk $p > /tmp/procstat_kk.out
-truss -o /tmp/crs_truss_output.txt -fDp $p > /tmp/crs_truss.out
+truss -o /tmp/crs_truss_output.txt -fDp $p
 ```
 > _after a couple of seconds, hit Ctrl+C to stop that truss command!_
 
