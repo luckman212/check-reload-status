@@ -26,6 +26,10 @@ There have been issues reported with this daemon (on both CE and Plus) for many 
 - [check_reload_status using 100% of my cpu • r/PFSENSE](https://www.reddit.com/r/PFSENSE/comments/5cm6sg/usrlocalsbincheck_reload_status_using_100_of_my/) (2016)
 - [Bug #2555: check_reload_status consumes 100% CPU usage](https://redmine.pfsense.org/issues/2555) (2012)
 
+### Screenshots of a recent case where this hang occurred
+
+<img src="./crs_hang_1.png" width=50% height=50%> <img src="./crs_hang_2.png" width=50% height=50%>
+
 ## Installing this package
 
 I compiled a `.pkg` (amd64) that can be installed directly from your device's console with:
