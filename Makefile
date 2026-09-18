@@ -1,7 +1,7 @@
 # $FreeBSD$
 
 PORTNAME=	check_reload_status
-PORTVERSION=	0.0.18
+PORTVERSION=	1
 CATEGORIES?=	sysutils
 MASTER_SITES=	# empty
 DISTFILES=	# none
@@ -38,13 +38,13 @@ do-build:
 	${CC} ${CFLAGS} -lsbuf -o ${WRKSRC}/fcgicli ${FILESDIR}/fcgicli.c
 
 do-install:
-	${INSTALL_PROGRAM} ${WRKSRC}/check_reload_status ${STAGEDIR}${PREFIX}/sbin/
-	${INSTALL_PROGRAM} ${WRKSRC}/pfSctl ${STAGEDIR}${PREFIX}/sbin/
-	${INSTALL_PROGRAM} ${WRKSRC}/fcgicli ${STAGEDIR}${PREFIX}/sbin/
 	${MKDIR} ${STAGEDIR}/etc
+	${MKDIR} ${STAGEDIR}${PREFIX}/etc
+	${INSTALL_PROGRAM} ${WRKSRC}/${PORTNAME} ${STAGEDIR}${PREFIX}/${WHERE}/
+	${INSTALL_PROGRAM} ${WRKSRC}/pfSctl ${STAGEDIR}${PREFIX}/${WHERE}/
+	${INSTALL_PROGRAM} ${WRKSRC}/fcgicli ${STAGEDIR}${PREFIX}/${WHERE}/
 	${INSTALL_SCRIPT} ${FILESDIR}/rc.gateway_monitor_reconcile \
 		${STAGEDIR}/etc/rc.gateway_monitor_reconcile
-	${MKDIR} ${STAGEDIR}${PREFIX}/etc
 	${INSTALL_DATA} ${FILESDIR}/check_reload_status.conf.sample \
 		${STAGEDIR}${PREFIX}/etc/check_reload_status.conf.sample
 

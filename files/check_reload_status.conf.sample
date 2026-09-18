@@ -1,14 +1,14 @@
 # Optional runtime tuning for check_reload_status.
 #
 # Copy this file to:
-#   /usr/local/etc/check_reload_status.conf
+# /usr/local/etc/check_reload_status.conf
 #
 # and uncomment only settings that need to differ from the built-in defaults.
 # Restart check_reload_status after changing the configuration; settings are
 # read only at process startup.
 #
-# Blank lines and lines beginning with '#' are ignored.  Values are integer
-# seconds.  Inline comments are not supported.
+# Blank lines and lines beginning with '#' are ignored. Values are integer
+# seconds. Inline comments are not supported.
 
 # FastCGI inactivity timeout while waiting for response progress.
 # Valid range: 1..300 seconds.
