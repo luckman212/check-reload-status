@@ -36,8 +36,8 @@ I compiled a `.pkg` (amd64) that can be installed directly from your device's co
 
 ```
 cp /usr/local/sbin/check_reload_status /usr/local/sbin/check_reload_status.orig
-fetch -o check_reload_status-0.0.18.pkg https://github.com/luckman212/check-reload-status/releases/download/0.0.18/check_reload_status-0.0.18.pkg
-pkg add -f check_reload_status-0.0.18.pkg
+fetch -o check_reload_status.pkg https://github.com/luckman212/check-reload-status/releases/download/1.0/check_reload_status-1.pkg
+pkg add -f check_reload_status.pkg
 ```
 
 For now, this package is built for **amd64** architecture only. I don't have an ARM build environment set up right now. My env is newer than what pfSense 26.07 was built with, so if you skip the `-f` flag, you'll likely see this warning when trying to install:
