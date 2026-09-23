@@ -12,7 +12,7 @@
 
 # FastCGI inactivity timeout while waiting for response progress.
 # Valid range: 1..300 seconds.
-# fcgi_response_timeout=10
+# fcgi_response_timeout=60
 
 # Maximum exponential retry-backoff delay for failures that are safe to retry.
 # Valid range: 1..300 seconds.

@@ -58,7 +58,7 @@
  */
 #define CONFIG_PATH "/usr/local/etc/check_reload_status.conf"
 
-#define FCGI_RESPONSE_TIMEOUT_DEFAULT  10
+#define FCGI_RESPONSE_TIMEOUT_DEFAULT  60
 
 /*
  * Upper bound on the number of commands queued at once. Delivery failures
