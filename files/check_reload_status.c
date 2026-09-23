@@ -56,9 +56,9 @@
  * re-armed on every activation of the socket event, so this is an inactivity
  * timeout rather than a total-response deadline.
  */
-#define	CONFIG_PATH	"/usr/local/etc/check_reload_status.conf"
+#define CONFIG_PATH "/usr/local/etc/check_reload_status.conf"
 
-#define	FCGI_RESPONSE_TIMEOUT_DEFAULT	10
+#define FCGI_RESPONSE_TIMEOUT_DEFAULT  10
 
 /*
  * Upper bound on the number of commands queued at once. Delivery failures
@@ -70,7 +70,7 @@
  * well under a megabyte. New events are refused once it is reached rather
  * than discarding queued ones: a queued command is work already accepted.
  */
-#define	MAX_QUEUED_COMMANDS	256
+#define MAX_QUEUED_COMMANDS  256
 
 /*
  * Delivery failures are retried indefinitely because dropping a queued
@@ -78,7 +78,7 @@
  * exponentially to this ceiling so a prolonged PHP-FPM outage does not
  * cause a tight retry loop.
  */
-#define	FCGI_RETRY_MAX_DELAY_DEFAULT	30
+#define FCGI_RETRY_MAX_DELAY_DEFAULT  30
 
 /*
  * Transient interface events are state transitions, not durable jobs. During
@@ -88,9 +88,9 @@
  * post-submission timeout wait long enough for the old PHP worker to finish
  * before performing at most one reconciliation pass.
  */
-#define	TRANSIENT_INITIAL_DEBOUNCE_DEFAULT	1
-#define	TRANSIENT_SETTLE_DELAY_DEFAULT	2
-#define	TRANSIENT_AMBIGUOUS_GRACE_DEFAULT	10
+#define TRANSIENT_INITIAL_DEBOUNCE_DEFAULT  1
+#define TRANSIENT_SETTLE_DELAY_DEFAULT  2
+#define TRANSIENT_AMBIGUOUS_GRACE_DEFAULT  10
 
 /*
  * Upper bound on how long dispatch may be deferred by newly arriving events.
@@ -101,9 +101,9 @@
  * first event of the current batch, so coalescing is preserved and forward
  * progress is guaranteed.
  */
-#define	TRANSIENT_MAX_DEBOUNCE_DEFAULT	20
-#define	GATEWAY_MONITOR_RECONCILE_DELAY_DEFAULT	10
-#define	GATEWAY_MONITOR_BUSY_RETRY_DEFAULT	2
+#define TRANSIENT_MAX_DEBOUNCE_DEFAULT  20
+#define GATEWAY_MONITOR_RECONCILE_DELAY_DEFAULT  10
+#define GATEWAY_MONITOR_BUSY_RETRY_DEFAULT  2
 
 /*
  * Gateway-monitor convergence runs as an ordinary rc script through the
@@ -112,7 +112,7 @@
  * that the interpreter path and include resolution stay in the script where
  * the rest of pfSense keeps them.
  */
-#define	GATEWAY_MONITOR_COMMAND	"/etc/rc.gateway_monitor_reconcile"
+#define GATEWAY_MONITOR_COMMAND "/etc/rc.gateway_monitor_reconcile"
 
 /*
  * Runtime tuning. These values start at conservative compiled-in defaults
@@ -123,17 +123,16 @@
 static int fcgi_response_timeout = FCGI_RESPONSE_TIMEOUT_DEFAULT;
 static int fcgi_retry_max_delay = FCGI_RETRY_MAX_DELAY_DEFAULT;
 static int gateway_monitor_busy_retry = GATEWAY_MONITOR_BUSY_RETRY_DEFAULT;
-static int gateway_monitor_reconcile_delay =
-    GATEWAY_MONITOR_RECONCILE_DELAY_DEFAULT;
+static int gateway_monitor_reconcile_delay = GATEWAY_MONITOR_RECONCILE_DELAY_DEFAULT;
 static int transient_ambiguous_grace = TRANSIENT_AMBIGUOUS_GRACE_DEFAULT;
 static int transient_initial_debounce = TRANSIENT_INITIAL_DEBOUNCE_DEFAULT;
 static int transient_max_debounce = TRANSIENT_MAX_DEBOUNCE_DEFAULT;
 static int transient_settle_delay = TRANSIENT_SETTLE_DELAY_DEFAULT;
 
-#define	TRANSIENT_KIND_NONE	0
-#define	TRANSIENT_KIND_LINKUP	1
-#define	TRANSIENT_KIND_NEWWANIP	2
-#define	TRANSIENT_KIND_NEWWANIPV6	3
+#define TRANSIENT_KIND_NONE        0
+#define TRANSIENT_KIND_LINKUP      1
+#define TRANSIENT_KIND_NEWWANIP    2
+#define TRANSIENT_KIND_NEWWANIPV6  3
 
 /*
  * Internal representation of a packet.
@@ -141,8 +140,8 @@ static int transient_settle_delay = TRANSIENT_SETTLE_DELAY_DEFAULT;
 struct runq {
 	TAILQ_ENTRY(runq) rq_link;
 	struct event ev;
-	char   command[2048];
-	char   params[256];
+	char command[2048];
+	char params[256];
 	int requestId;
 	int aggregate;
 	int dontexec;
@@ -182,40 +181,41 @@ struct runq {
 TAILQ_HEAD(runqueue, runq) cmds = TAILQ_HEAD_INITIALIZER(cmds);;
 
 /* function definitions */
-static void			load_config(void);
-static char			*trim_whitespace(char *);
-static void			handle_signal(int);
-static void			handle_signal_act(int, siginfo_t *, void *);
-static void			run_command(struct command *, char *);
-static void			set_blockmode(int socket, int cmd);
-struct command *	match_command(struct command *target, char *wordpassed);
-struct command *	parse_command(int fd, int argc, char **argv);
-static void			socket_read_command(int socket, short event, void *arg);
-static void			show_command_list(int fd, const struct command *list);
-static void			socket_accept_command(int socket, short event, void *arg);
-static void			socket_close_command(int fd, struct event *ev);
-static void			socket_read_fcgi(int, short, void *);
-static void			fcgi_reset_response(struct runq *);
-static void			fcgi_close_socket(struct runq *);
-static void			fcgi_drop_command(struct runq *);
-static void			fcgi_retry_command(struct runq *);
-static int			fcgi_is_transient_command(const struct runq *);
-static int			transient_command_kind(const char *);
-static int			transient_query_value(const char *, const char *, char *, size_t);
-static int			transient_decode_event(const char *, const char *, int *, char *, size_t, int *);
-static void			transient_update_pending(struct runq *, int, int);
-static int			transient_has_pending(const struct runq *);
-static time_t			transient_monotonic(void);
-static void			transient_schedule(struct runq *, int, int);
-static void			transient_dispatch(int, short, void *);
-static void			transient_finish(struct runq *, int);
-static void			transient_ambiguous(struct runq *, const char *);
-static void			gateway_monitor_schedule(void);
-static void			gateway_monitor_reconcile(int, short, void *);
-static void			fcgi_response_failure(struct runq *, const char *);
-static void			fcgi_arm_socket_timeout(struct runq *);
-static void			fcgi_send_command(int, short, void *);
-static int			fcgi_open_socket(struct runq *);
+static void         load_config(void);
+static void         log_config_overrides(void);
+static char         *trim_whitespace(char *);
+static void         handle_signal(int);
+static void         handle_signal_act(int, siginfo_t *, void *);
+static void         run_command(struct command *, char *);
+static void         set_blockmode(int socket, int cmd);
+struct command *    match_command(struct command *target, char *wordpassed);
+struct command *    parse_command(int fd, int argc, char **argv);
+static void         socket_read_command(int socket, short event, void *arg);
+static void         show_command_list(int fd, const struct command *list);
+static void         socket_accept_command(int socket, short event, void *arg);
+static void         socket_close_command(int fd, struct event *ev);
+static void         socket_read_fcgi(int, short, void *);
+static void         fcgi_reset_response(struct runq *);
+static void         fcgi_close_socket(struct runq *);
+static void         fcgi_drop_command(struct runq *);
+static void         fcgi_retry_command(struct runq *);
+static int          fcgi_is_transient_command(const struct runq *);
+static int          transient_command_kind(const char *);
+static int          transient_query_value(const char *, const char *, char *, size_t);
+static int          transient_decode_event(const char *, const char *, int *, char *, size_t, int *);
+static void         transient_update_pending(struct runq *, int, int);
+static int          transient_has_pending(const struct runq *);
+static time_t       transient_monotonic(void);
+static void         transient_schedule(struct runq *, int, int);
+static void         transient_dispatch(int, short, void *);
+static void         transient_finish(struct runq *, int);
+static void         transient_ambiguous(struct runq *, const char *);
+static void         gateway_monitor_schedule(void);
+static void         gateway_monitor_reconcile(int, short, void *);
+static void         fcgi_response_failure(struct runq *, const char *);
+static void         fcgi_arm_socket_timeout(struct runq *);
+static void         fcgi_send_command(int, short, void *);
+static int          fcgi_open_socket(struct runq *);
 
 static pid_t ppid = -1;
 static struct utsname uts;
@@ -325,8 +325,8 @@ fcgi_open_socket(struct runq *cmd)
 static void
 show_command_list(int fd, const struct command *list)
 {
-	int     i;
-	char	value[2048];
+	int i;
+	char    value[2048];
 
 	if (list == NULL)
 		return;
@@ -375,8 +375,8 @@ show_command_list(int fd, const struct command *list)
 struct command *
 parse_command(int fd, int argc, char **argv)
 {
-	struct command	*start = first_level;
-	struct command	*match = NULL;
+	struct command  *start = first_level;
+	struct command  *match = NULL;
 	const char *errstring = "ERROR:\tvalid commands are:\n";
 
 	while (argc >= 0) {
@@ -1923,7 +1923,7 @@ trim_whitespace(char *s)
 	return (s);
 }
 
-struct config_setting {
+struct config_option {
 	const char *name;
 	int *value;
 	int default_value;
@@ -1931,43 +1931,86 @@ struct config_setting {
 	int max_value;
 };
 
+static const struct config_option config_options[] = {
+	{
+		"fcgi_response_timeout",
+		&fcgi_response_timeout,
+		FCGI_RESPONSE_TIMEOUT_DEFAULT,
+		1, 300
+	},
+	{
+		"fcgi_retry_max_delay",
+		&fcgi_retry_max_delay,
+		FCGI_RETRY_MAX_DELAY_DEFAULT,
+		1, 300
+	},
+	{
+		"gateway_monitor_busy_retry",
+		&gateway_monitor_busy_retry,
+		GATEWAY_MONITOR_BUSY_RETRY_DEFAULT,
+		1, 60
+	},
+	{
+		"gateway_monitor_reconcile_delay",
+		&gateway_monitor_reconcile_delay,
+		GATEWAY_MONITOR_RECONCILE_DELAY_DEFAULT,
+		1, 300
+	},
+	{
+		"transient_ambiguous_grace",
+		&transient_ambiguous_grace,
+		TRANSIENT_AMBIGUOUS_GRACE_DEFAULT,
+		1, 300
+	},
+	{
+		"transient_initial_debounce",
+		&transient_initial_debounce,
+		TRANSIENT_INITIAL_DEBOUNCE_DEFAULT,
+		0, 60
+	},
+	{
+		"transient_max_debounce",
+		&transient_max_debounce,
+		TRANSIENT_MAX_DEBOUNCE_DEFAULT,
+		1, 300
+	},
+	{
+		"transient_settle_delay",
+		&transient_settle_delay,
+		TRANSIENT_SETTLE_DELAY_DEFAULT,
+		0, 60
+	},
+};
+
+#define CONFIG_OPTIONS_COUNT \
+	(sizeof(config_options) / sizeof(config_options[0]))
+
+static void
+log_config_overrides(void)
+{
+	size_t i;
+
+	for (i = 0; i < CONFIG_OPTIONS_COUNT; i++) {
+		if (*config_options[i].value != config_options[i].default_value) {
+			syslog(LOG_NOTICE,
+			    "Configuration override: %s=%d (default=%d)",
+			    config_options[i].name,
+			    *config_options[i].value,
+			    config_options[i].default_value);
+		}
+	}
+}
+
 static void
 load_config(void)
 {
-	static struct config_setting settings[] = {
-		{	"fcgi_response_timeout", &fcgi_response_timeout,
-			FCGI_RESPONSE_TIMEOUT_DEFAULT, 1, 300
-		},
-		{	"fcgi_retry_max_delay", &fcgi_retry_max_delay,
-			FCGI_RETRY_MAX_DELAY_DEFAULT, 1, 300
-		},
-		{	"gateway_monitor_busy_retry", &gateway_monitor_busy_retry,
-			GATEWAY_MONITOR_BUSY_RETRY_DEFAULT, 1, 60
-		},
-		{	"gateway_monitor_reconcile_delay",
-			&gateway_monitor_reconcile_delay,
-			GATEWAY_MONITOR_RECONCILE_DELAY_DEFAULT, 1, 300
-		},
-		{	"transient_ambiguous_grace", &transient_ambiguous_grace,
-			TRANSIENT_AMBIGUOUS_GRACE_DEFAULT, 1, 300
-		},
-		{	"transient_initial_debounce", &transient_initial_debounce,
-			TRANSIENT_INITIAL_DEBOUNCE_DEFAULT, 0, 60
-		},
-		{	"transient_max_debounce", &transient_max_debounce,
-			TRANSIENT_MAX_DEBOUNCE_DEFAULT, 1, 300
-		},
-		{	"transient_settle_delay", &transient_settle_delay,
-			TRANSIENT_SETTLE_DELAY_DEFAULT, 0, 60
-		},
-		{ NULL, NULL, 0, 0, 0 }
-	};
-	struct config_setting *setting;
+	const struct config_option *setting;
 	FILE *fp;
 	char line[512], *key, *value, *equals, *end;
 	long parsed;
 	unsigned int lineno = 0;
 	int saw_config = 0;
+	size_t i;
 
 	fp = fopen(CONFIG_PATH, "r");
 	if (fp == NULL) {
@@ -2014,10 +2057,9 @@ load_config(void)
 		}
 
 		setting = NULL;
-		for (struct config_setting *candidate = settings;
-		        candidate->name != NULL; candidate++) {
-			if (strcmp(candidate->name, key) == 0) {
-				setting = candidate;
+		for (i = 0; i < CONFIG_OPTIONS_COUNT; i++) {
+			if (strcmp(config_options[i].name, key) == 0) {
+				setting = &config_options[i];
 				break;
 			}
 		}
@@ -2064,12 +2106,6 @@ load_config(void)
 		return;
 
 	syslog(LOG_NOTICE, "Using configuration from %s", CONFIG_PATH);
-	for (setting = settings; setting->name != NULL; setting++) {
-		if (*setting->value != setting->default_value)
-			syslog(LOG_INFO, "%s=%d (default %d)",
-			       setting->name, *setting->value,
-			       setting->default_value);
-	}
 }
 
 static void
@@ -2123,6 +2159,7 @@ main(void)
 	syslog(LOG_INFO, "check_reload_status is starting.");
 
 	load_config();
+	log_config_overrides();
 
 	uname(&uts);
 
