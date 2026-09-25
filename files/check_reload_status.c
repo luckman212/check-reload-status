@@ -964,9 +964,11 @@ gateway_monitor_reconcile(int fd __unused, short event __unused, void *arg __unu
 }
 
 /*
- * A serialized request completed successfully. Move on only after a short
- * settle interval. For link STOP, IP reconciliation queued before the STOP
- * is stale and is discarded.
+ * A serialized request completed successfully. Suppress a pending link
+ * operation if events observed while the active operation was running
+ * converged back to the state it just successfully established. Otherwise,
+ * move on after a short settle interval. For link STOP, IP reconciliation
+ * queued before the STOP is stale and is discarded.
  */
 static void
 transient_finish(struct runq *cmd, int success)
@@ -985,12 +987,33 @@ transient_finish(struct runq *cmd, int success)
 	cmd->transient_active_kind = TRANSIENT_KIND_NONE;
 	cmd->transient_active_reconcile = 0;
 
+	/*
+	 * A successful link operation already established the requested final
+	 * state. If events observed while it was running converged back to that
+	 * same state, another identical rc.linkup invocation is redundant and
+	 * can create a feedback loop on interfaces that cycle link state while
+	 * being configured.
+	 *
+	 * Preserve a pending opposite state: it represents a genuine change
+	 * that occurred while the active operation was running.
+	 */
+	if (success && active_kind == TRANSIENT_KIND_LINKUP &&
+	    cmd->transient_link_pending &&
+	    cmd->transient_desired_link_action == active_action) {
+		syslog(LOG_DEBUG,
+		       "Suppressing redundant rc.linkup %s for interface %s after successful completion",
+		       active_action ? "start" : "stop",
+		       cmd->transient_interface);
+		cmd->transient_link_pending = 0;
+		cmd->transient_link_reconcile = 0;
+	}
+
 	if (success && (active_kind == TRANSIENT_KIND_NEWWANIP ||
-	                active_kind == TRANSIENT_KIND_NEWWANIPV6))
+	    active_kind == TRANSIENT_KIND_NEWWANIPV6))
 		cmd->transient_gateway_reconcile = 1;
 
 	if (success && active_kind == TRANSIENT_KIND_LINKUP &&
-	        active_action == 0 && !cmd->transient_link_pending) {
+	    active_action == 0 && !cmd->transient_link_pending) {
 		cmd->transient_newwanip_pending = 0;
 		cmd->transient_newwanip_reconcile = 0;
 		cmd->transient_newwanipv6_pending = 0;
