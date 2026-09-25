@@ -36,7 +36,7 @@ I compiled a `.pkg` (amd64) that can be installed directly from your device's co
 
 ```
 cp /usr/local/sbin/check_reload_status /usr/local/sbin/check_reload_status.orig
-fetch -o check_reload_status.pkg https://github.com/luckman212/check-reload-status/releases/download/1.0.1/check_reload_status-2.pkg
+fetch -o check_reload_status.pkg https://github.com/luckman212/check-reload-status/releases/download/1.0.4/check_reload_status-4.pkg
 pkg add -f check_reload_status.pkg
 ```
 
