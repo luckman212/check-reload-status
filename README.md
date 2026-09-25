@@ -62,6 +62,7 @@ Some people have been reporting more issues since updating to pfSense 26.07 or C
 
 If you're going to file an issue, include as much detail as you can. At a minimum, the below would be useful:
 
+- set your loglevel to DEBUG (Status -> System Logs -> Settings -> Default Log Level)
 - a copy of `/var/log/system.log` from around the time of the event (redacted if you want)
 - a copy of each `*.out` file produced by the commands below:
 
